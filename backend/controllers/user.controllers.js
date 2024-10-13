@@ -2,13 +2,18 @@ const User = require("../models/UserSchema.js");
 let dotenv = require("dotenv");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const getDataUri = require("../utils/datauri.js");
+const cloudinary = require("../utils/cloudinary.js");
 dotenv.config();
 
 const register = async (req, res) => {
   console.log(req.body);
   try {
     const { fullname, email, phoneNumber, password, role } = req.body;
-
+    const file = req.file;
+    const fileUri = getDataUri(file);
+    const myCloud = await cloudinary.uploader.upload(fileUri.content);
+    console.log(myCloud);
     if (!fullname || !email || !phoneNumber || !password || !role) {
       return res
         .status(401)
@@ -30,6 +35,9 @@ const register = async (req, res) => {
       phoneNumber,
       password: hashedPasssword,
       role,
+      profile: {
+        profilePhoto: myCloud.secure_url,
+      },
     });
     return res
       .status(201)
@@ -112,12 +120,17 @@ const logout = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { fullname, email, phoneNumber, bio, skills } = req.body;
-    const file = req.file;
+    let { fullname, email, phoneNumber, bio, skills } = req.body;
+    let file = req.file;
 
     // cloudinary upload
 
-    const skillsArray = "";
+    const fileUri = getDataUri(file);
+    console.log(file);
+
+    const myCloud = await cloudinary.uploader.upload(fileUri.content);
+
+    let skillsArray = "";
 
     if (skills) {
       skillsArray = skills.split(",");
@@ -150,6 +163,12 @@ const updateProfile = async (req, res) => {
       user.profile.skills = skillsArray;
     }
 
+    if (myCloud) {
+      user.profile.resume = myCloud.secure_url;
+      user.profile.resumeOriginalName = file.originalname;
+    }
+
+    console.log(myCloud);
     //resume comes here
 
     await user.save();

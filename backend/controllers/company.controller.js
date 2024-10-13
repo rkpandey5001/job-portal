@@ -1,5 +1,7 @@
 const express = require("express");
 const Company = require("../models/CompanySchema.js");
+const getDataUri = require("../utils/datauri.js");
+const cloudinary = require("../utils/cloudinary.js");
 
 //get all companies
 
@@ -78,15 +80,21 @@ const getCompanyById = async (req, res) => {
 
 const updateCompany = async (req, res) => {
   try {
-    const { name, description, website, location, logo } = req.body;
+    const { name, description, website, location } = req.body;
 
     const file = req.file; //cloudinary
+
+    const fileUri = getDataUri(file); //cloudinary
+
+    const resCloud = await cloudinary.uploader.upload(fileUri.content);
+    const logo = resCloud.secure_url;
 
     const updateData = {
       name,
       description,
       website,
       location,
+      logo,
     };
 
     let company = await Company.findByIdAndUpdate(req.params.id, updateData, {

@@ -64,8 +64,9 @@ const getAllJobs = async (req, res) => {
         { description: { $regex: keyword, $options: "i" } },
       ],
     };
+
     const jobs = await Job.find(query)
-      .populate({ path: "company" })
+      .populate("company")
       .sort({ createdAt: -1 });
 
     if (!jobs) {
@@ -80,9 +81,7 @@ const getAllJobs = async (req, res) => {
 //get job by id for student
 const getJobById = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id)
-      .populate("company")
-      .populate("created_by");
+    const job = await Job.findById(req.params.id).populate("applications");
 
     if (!job) {
       return res.status(404).json({ message: "No job found", success: false });

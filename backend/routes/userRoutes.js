@@ -13,6 +13,6 @@ const router = express.Router();
 router.route("/register").post(singleUpload, register);
 router.route("/login").post(login);
 router.route("/logout").get(logout);
-router.route("/profile/update").post(auth, updateProfile);
+router.route("/profile/update").post(auth, singleUpload, updateProfile);
 
 module.exports = router;

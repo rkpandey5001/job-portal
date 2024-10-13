@@ -8,8 +8,9 @@ import { USER_API_END_POINT } from '@/utils/host';
 import { toast } from "sonner";
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { setLoading } from '@/redux/authSlice';
+import { setLoading, setUser } from '@/redux/authSlice';
 import { Loader2 } from 'lucide-react';
+
 
 
 const Login = () => {
@@ -29,7 +30,6 @@ const Login = () => {
   
   const handleSubmit=async(e)=>{
     e.preventDefault();
-    console.log(input);
       dispatch(setLoading(true));
       await axios.post(`${USER_API_END_POINT}/login`,input,{
         headers:{
@@ -37,10 +37,10 @@ const Login = () => {
         },
         withCredentials:true
       }).then(res=>{
-        console.log(res.data);
         if(res.data.success){
-          toast.success(res.data.message);
+          dispatch(setUser(res.data.user));
           navigate('/');
+          toast.success(res.data.message);
         }
       }).catch(err=>{
          toast.error(err.response.data.message);
